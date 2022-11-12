@@ -10,7 +10,7 @@ FPS_MUltiplayer/[Bb]uilds/
 FPS_MUltiplayer/[Ll]ogs/
 FPS_MUltiplayer/[Uu]ser[Ss]ettings/
 FPS_MUltiplayer/[Aa]ssets/FPS*
-FPS_MUltiplayer/[Aa]ssets/Modassets
+[Aa]ssets/Modassets
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
