@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Mirror;
 public interface Damageable 
 {
-    public void Damage(float dmg);  
+    
+    public void CmdDamage(float dmg);  
 }

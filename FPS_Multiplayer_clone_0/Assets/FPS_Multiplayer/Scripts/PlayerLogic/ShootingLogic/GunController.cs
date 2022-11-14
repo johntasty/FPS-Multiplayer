@@ -40,7 +40,7 @@ public class GunController : NetworkBehaviour
                 if(Physics.Raycast(muzzle.transform.position, muzzle.transform.forward, out RaycastHit hit, gun.MaxRange))
                 {
                     Damageable interactable = hit.transform.GetComponent<Damageable>();
-                    interactable?.Damage(gun.Damage);
+                    interactable?.CmdDamage(gun.Damage);
                 }
                 gun.StartingAmmo--;
                 timeSinceLastShot = 0;

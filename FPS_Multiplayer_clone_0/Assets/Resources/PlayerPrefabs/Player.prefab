@@ -15491,6 +15491,7 @@ GameObject:
   - component: {fileID: 8354570870762877385}
   - component: {fileID: -4050746852712644785}
   - component: {fileID: -5054717105171194353}
+  - component: {fileID: 6051864080367354838}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -15747,6 +15748,35 @@ MonoBehaviour:
   syncInterval: 0.1
   gun: {fileID: 11400000, guid: 1a3f00d6c7fbacf459aa92fa2561ae09, type: 2}
   muzzle: {fileID: 8790593489281740158}
+  ShootingHeld: 0
+--- !u!114 &6051864080367354838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7158156486477595372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 361009849812007614}
+  clientAuthority: 0
+  onlySyncOnChange: 1
+  bufferResetMultiplier: 5
+  positionSensitivity: 0.01
+  rotationSensitivity: 0.01
+  scaleSensitivity: 0.01
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
 --- !u!1 &7941749785965729979
 GameObject:
   m_ObjectHideFlags: 0

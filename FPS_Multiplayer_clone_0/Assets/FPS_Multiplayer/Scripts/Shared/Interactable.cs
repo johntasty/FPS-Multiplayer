@@ -8,15 +8,23 @@ public class Interactable : NetworkBehaviour, Damageable
     [SyncVar]
     public float Health = 100f;
 
-    public void Damage(float damgeValue)
+    [Command(requiresAuthority = false)]
+    public void CmdDamage(float damgeValue)
     {
-        Debug.Log("Shot");
+       
         Health -= damgeValue;
         if (Health <= 0)
         {
             Debug.Log("Dead");
+            DestoryNpc();
         }
     }
-
+    #region Server
+    [Server]
+    private void DestoryNpc()
+    {
+        NetworkServer.Destroy(gameObject);
+    }
+    #endregion
 
 }
