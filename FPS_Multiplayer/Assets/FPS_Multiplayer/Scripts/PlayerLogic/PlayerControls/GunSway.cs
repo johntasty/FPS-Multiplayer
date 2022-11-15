@@ -20,7 +20,7 @@ public class GunSway : NetworkBehaviour
     {
         float mouseX = aimControll.x * sensitivityMu;
         float mouseY = aimControll.y * sensitivityMu;
-
+        mouseY = Mathf.Clamp(mouseY, -10, 10);
         Quaternion rotationX = Quaternion.AngleAxis(-mouseY, Vector3.right);
         Quaternion rotationY = Quaternion.AngleAxis(mouseX, Vector3.up);
 

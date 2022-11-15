@@ -13,14 +13,16 @@ MonoBehaviour:
   m_Name: AssaultRifle
   m_EditorClassIdentifier: 
   GunName: ' Assault Rifle'
+  GunPrefab: {fileID: 0}
   Damage: 4
   MaxRange: 200
-  StartingAmmo: 7
+  StartingAmmo: 8
   AmmoCapacity: 30
   FireRate: 1200
   ReloadTime: 2
   muzzleFlash: {fileID: 4361613046433130778, guid: eeaff2ca249ed184e88a2281babb9733,
     type: 3}
+  BulletTracer: {fileID: 0}
   bulletSpeed: 1000
   bulletDrop: 100
   reload: 0

@@ -8,6 +8,9 @@ public class GunData : ScriptableObject
     [Header("Gun Name")]
     public string GunName;
 
+    [Header("Gun Prefab")]
+    public GameObject GunPrefab;
+
     [Header("Gun Stats")]
     public float Damage;
     public float MaxRange;
@@ -21,6 +24,8 @@ public class GunData : ScriptableObject
     public float ReloadTime;
     [Header("Gun Effects")]
     public ParticleSystem muzzleFlash;
+    [Header("Bullet Tracer")]
+    public TrailRenderer BulletTracer;
     [Header("Bullet Settings")]
     public float bulletSpeed;
     public float bulletDrop;

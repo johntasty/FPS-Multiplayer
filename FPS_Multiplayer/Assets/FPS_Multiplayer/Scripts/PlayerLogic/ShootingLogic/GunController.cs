@@ -15,6 +15,10 @@ public class GunController : NetworkBehaviour
     [Header("Impact effects, Set by name")]
     [SerializeField] List <ParticleSystem> hitEffects = new List<ParticleSystem>();
     [SerializeField] TrailRenderer bullerTracer;
+
+    [Header("CrossHairs")]
+    [SerializeField] Transform crossHairs;
+    [SerializeField] GameObject hitMarker;
     //bullet Settings
     class Bullet
     {
@@ -35,13 +39,15 @@ public class GunController : NetworkBehaviour
     private bool muzzleFlashSet = false;
 
     public override void OnStartAuthority()
-    {        
+    {
+        
         if (!isOwned) { return; }
         enabled = true;
         
     }
     
     private bool CanShoot() => !gun.reload && timeSinceLastShot > 1f / (gun.FireRate / 60f);
+
     private void OnFire(InputValue value)
     {
         
@@ -76,7 +82,10 @@ public class GunController : NetworkBehaviour
         {
             if (CanShoot())
             {
-                rayCastDestination = muzzle.forward * gun.MaxRange;
+                Vector3 _screenPos = Camera.main.ScreenToWorldPoint(crossHairs.position);
+                Vector3 rayPoint = Camera.main.transform.forward;
+                rayCastDestination = (rayPoint  * gun.MaxRange) + _screenPos;
+                
                 GunFired();         
 
                 gun.StartingAmmo--;
@@ -128,12 +137,12 @@ public class GunController : NetworkBehaviour
         ray.origin = pos0;
         ray.direction = direction;
         if(Physics.Raycast(ray, out RaycastHit hit, distance))
-        {
-            Debug.Log("hitCheck");
+        {            
             string surface = hit.transform.tag;
             HitEffect(surface, hit);
             bullet.tracer.transform.position = hit.point;
             bullet.time = maxLifeBullet;
+            StartCoroutine(HitMarkerOn(hit));
         }
         else
         {
@@ -208,6 +217,21 @@ public class GunController : NetworkBehaviour
         }        
         while (gun.StartingAmmo < gun.AmmoCapacity);
         gun.reload = false;
+    }
+    private IEnumerator HitMarkerOn(RaycastHit hit)
+    {
+        //hit marker animation
+        hitMarker.SetActive(true);
+        hitMarker.transform.position = Camera.main.WorldToScreenPoint(hit.point);       
+        float timeElapsed = 0;
+        do {
+            timeElapsed += Time.deltaTime;
+            float normalizedTime = timeElapsed / 0.1f;            
+            hitMarker.GetComponent<RectTransform>().sizeDelta = Vector2.Lerp(new Vector2(40f, 40f), new Vector2(80f, 80f), normalizedTime);            
+            yield return null;            
+        } while (timeElapsed < 0.1f);
+        hitMarker.GetComponent<RectTransform>().sizeDelta = new Vector2(40f, 40f);
+        hitMarker.SetActive(false);
     }
 
     #region Server Command
