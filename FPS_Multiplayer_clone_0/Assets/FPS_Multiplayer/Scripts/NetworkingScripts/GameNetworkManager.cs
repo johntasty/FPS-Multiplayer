@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
-
+using System.Linq;
 /*
 	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
 	API Reference: https://mirror-networking.com/docs/api/Mirror.NetworkManager.html
@@ -223,12 +223,20 @@ public class GameNetworkManager : NetworkManager
     /// This is invoked when a server is started - including when a host is started.
     /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
     /// </summary>
-    public override void OnStartServer() { }
+    public override void OnStartServer() { spawnPrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs").ToList(); }
 
     /// <summary>
     /// This is invoked when the client is started.
     /// </summary>
-    public override void OnStartClient() { }
+    public override void OnStartClient()
+    {
+        var spawnablePrefabs = Resources.LoadAll<GameObject>("SpawnablePrefabs");
+
+        foreach (var prefab in spawnablePrefabs)
+        {
+            NetworkClient.RegisterPrefab(prefab);
+        }
+    }
 
     /// <summary>
     /// This is called when a host is stopped.

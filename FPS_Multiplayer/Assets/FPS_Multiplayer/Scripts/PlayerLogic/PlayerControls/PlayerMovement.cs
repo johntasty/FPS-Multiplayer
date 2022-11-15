@@ -35,7 +35,7 @@ public class PlayerMovement : NetworkBehaviour
         if (!isOwned) { return; }
         //enable script when loaded
         enabled = true;
-
+        gun.gameObject.SetActive(true);
         //set each connecte player with thir own camera
         _Controller = transform.GetComponent<CharacterController>();
         _CameraHolder.gameObject.SetActive(true);
@@ -47,6 +47,7 @@ public class PlayerMovement : NetworkBehaviour
         transform.GetComponent<PlayerInput>().enabled = true;
         gunSettings = transform.GetComponent<GunSway>();
         ShootLogic = transform.GetComponent<GunController>();
+       
 
 
     }
@@ -87,7 +88,7 @@ public class PlayerMovement : NetworkBehaviour
     }
     private void LateUpdate()
     {
-        ShootLogic.UpdateShotTimer();
+        ShootLogic.UpdateShotTimer(Time.deltaTime);
         gunSettings.AimGun();
         CameraMovement();
     }
