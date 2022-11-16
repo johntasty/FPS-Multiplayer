@@ -27,37 +27,40 @@ public class PlayerMovement : NetworkBehaviour
     //gun settings
     private GunSway gunSettings;
     private GunController ShootLogic;
-    [SerializeField] Transform gun;
+    //[SerializeField] Transform gun;
 
     //animators
     [SerializeField] Animator animationsController;
 
-    public override void OnStartAuthority()
+    private void Awake()
     {
+        gunSettings = transform.GetComponent<GunSway>();
+        ShootLogic = transform.GetComponent<GunController>();
+        ShootLogic.SetInitialData();
+    }
+    public override void OnStartAuthority()
+    {        
         if (!isOwned) { return; }
         //enable script when loaded
-        enabled = true;
-        gun.gameObject.SetActive(true);
+        enabled = true;        
         //set each connected player with thir own camera
         _Controller = transform.GetComponent<CharacterController>();
         _CameraHolder.gameObject.SetActive(true);
         follower = _CameraHolder.GetCinemachineComponent<Cinemachine3rdPersonFollow>();
-        Camera.main.transform.SetParent(transform);        
+        Camera.main.transform.SetParent(_CameraParent.transform);        
         Camera.main.transform.localPosition = new Vector3(0, 0, 0);        
         Cursor.lockState = CursorLockMode.Locked;
         //compoments to update
-        transform.GetComponent<PlayerInput>().enabled = true;
-        gunSettings = transform.GetComponent<GunSway>();
-        ShootLogic = transform.GetComponent<GunController>();
-     
+        transform.GetComponent<PlayerInput>().enabled = true;      
+
     }
     #region InputActions
-    //actions can be found in the input map in the inspector
+    //actions can be found in the input map in the inspectors
     private void OnMove(InputValue value)
     {
         move = value.Get<Vector2>();        
     }
-   private void OnLook(InputValue value)
+    private void OnLook(InputValue value)
     {
         _CameraRot = value.Get<Vector2>();
         
@@ -100,7 +103,8 @@ public class PlayerMovement : NetworkBehaviour
 
         Quaternion movePos = Quaternion.AngleAxis(RotSet, Vector3.up);
         //rotating the camera up/down clamped angle for shooter
-        _CameraParent.transform.localRotation = Quaternion.Euler(RotSety, 0f, 0f); 
+        Quaternion _CamRotation = Quaternion.AngleAxis(RotSety, Vector3.right);
+        _CameraParent.transform.localRotation = _CamRotation; 
         //slowly rotate the player towards the movement direction
         transform.rotation = Quaternion.Slerp(transform.rotation, movePos, _RotationSpeed * Time.deltaTime);
     }
@@ -116,6 +120,7 @@ public class PlayerMovement : NetworkBehaviour
     {
         ShootLogic.UpdateShotTimer(Time.deltaTime);
         gunSettings.AimGun();
+        ShootLogic.Recoil();
         CameraMovement();
     }
 }

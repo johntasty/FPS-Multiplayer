@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Metal
   - Stone
+  - Weapon
   layers:
   - Default
   - TransparentFX
