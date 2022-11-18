@@ -39,10 +39,10 @@ public class PlayerMovement : NetworkBehaviour
     //animators
     [SerializeField] Animator animationsController;
     [SerializeField] Animator LocomotionAnimator;
-
+    //animator blendtree variables
     private int speedX;
     private int speedY;
-
+    //speed while not sprinting
     float TargetSpeed = 3.5f;
     [SyncVar]
     public Vector2 currentVelocity;
@@ -120,8 +120,9 @@ public class PlayerMovement : NetworkBehaviour
     {      
         //moves forward/backwards etc.. based on transforms forward direction
         Vector3 movement = transform.right * move.x + transform.forward * move.y;
+        //set movement speedbased on the lenght of the two vectors x/y
         float movementSpeed = currentVelocity.magnitude;
-
+        //gravity
         vSpeed -= gravity * Time.deltaTime;
         movement.y = vSpeed;
 
@@ -137,6 +138,8 @@ public class PlayerMovement : NetworkBehaviour
     //camera rotations 
     private void CameraMovement()
     {
+        //adding to the rotation makes thecamerastay in the position we rotated
+        //if notit would snap back to 0
         RotSet += _CameraRot.x * mouseSensitivity * Time.deltaTime;
         RotSety -= _CameraRot.y * mouseSensitivity * Time.deltaTime;
 
@@ -152,6 +155,7 @@ public class PlayerMovement : NetworkBehaviour
     
     private void FixedUpdate()
     {
+        //fixed update because its unnessescary to run this every frame for moving
         if (!isOwned) { return; }
         MovementController();
 
@@ -159,13 +163,15 @@ public class PlayerMovement : NetworkBehaviour
     //camera and timers are in set in lateUpdate for smoothermovement
     private void LateUpdate()
     {
+        //sprint key
         if (!isOwned) { return; }
         if (Input.GetKey(KeyCode.LeftShift))
         {
             TargetSpeed = 4;
         }
         else { TargetSpeed = 3.5f; }
-        
+        //added due to a problem with cinemachine
+        //focus position wouldlag behind what I wantewd to track if made into a child
         FocusCamera.position = ShootLogic.CameraFocusing.position;
         ShootLogic.UpdateShotTimer(Time.deltaTime);        
         gunSettings.AimGun();
@@ -174,23 +180,12 @@ public class PlayerMovement : NetworkBehaviour
         CameraMovement();
 
     }
+    //canvas ui bullets showing
     private void UpdateBulets()
     {
         Vector2 ammo = ShootLogic.GetGunAmmo();
         bulletCount.text = ammo.x.ToString() + " / " + ammo.y.ToString();
     }
-    #region ServerCommand
-    [Command(requiresAuthority = false)]
-
-    private void CmdSynceAnimationState()
-    {
-        RpcSyncVelocity();
-    }
-    [ClientRpc(includeOwner = true)]
-    private void RpcSyncVelocity()
-    {
-        
-    }
-    #endregion
+   
 
 }

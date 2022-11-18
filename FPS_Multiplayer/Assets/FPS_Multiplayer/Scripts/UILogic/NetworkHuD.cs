@@ -8,6 +8,7 @@ using TMPro;
 [RequireComponent(typeof(NetworkManager))]
 public class NetworkHuD : MonoBehaviour
 {
+    //networking main menu ui
     NetworkManager manager;
     [SerializeField] TMP_InputField ipAdress;
     void Awake()

@@ -36,6 +36,7 @@ public class GunController : NetworkBehaviour
     #region Client Callbacks
     public override void OnStartClient()
     {
+        //inventory of weapons
         gunPrefabServer.Callback += OnWeaponAdded;
 
         // Process Synclist on Spawn
@@ -102,6 +103,8 @@ public class GunController : NetworkBehaviour
     #endregion
     public void SetInitialData()
     {
+        //set for intial data of primary weapon to be ready to fire
+        //TODO start with holstered weapon
         gun = guns[WeaponIndex];
         gun.reload = false;
         WeaponSet(gun);
@@ -109,10 +112,12 @@ public class GunController : NetworkBehaviour
               
         foreach (GunData gunPrefabs in guns)
         {
+            //calculating muzzle position
             GameObject gunToAdd = Instantiate(gunPrefabs.GunPrefab, gunsParent);
             Vector3 muzzlePos = gunToAdd.GetComponent<MeshFilter>().mesh.bounds.size;       
             muzzle.localPosition = new Vector3(0f, muzzlePos.x, muzzlePos.y);
             CameraFocusing.localPosition = muzzle.localPosition;
+            //setting the gun prefabs to the inventory
             gunToAdd.transform.localPosition = Vector3.zero;
             gunToAdd.name = gunPrefabs.GunName;
             gunPrefabClient.Add(gunToAdd);
@@ -121,6 +126,7 @@ public class GunController : NetworkBehaviour
         }
         gunPrefabClient[0].SetActive(true);
         if (!isOwned) { return; }
+        //serverweapon spawn for our copies
         CmdSpawnWeapon();
     }
 
@@ -134,6 +140,8 @@ public class GunController : NetworkBehaviour
         recoilStat.speed = gunActive.recoilStats.speed;
         recoilStat.strenght = gunActive.recoilStats.strenght;
     }
+    //recoil implementation with kickback
+    //called on late upadte from the player movement
     public void Recoil()
     {
         //recoil
@@ -155,7 +163,7 @@ public class GunController : NetworkBehaviour
             UnityEngine.Random.Range(-recoilStat.recoilZ, recoilStat.recoilZ));
         recoilStat.targetKickBack += new Vector3(0f, 0f, UnityEngine.Random.Range(-1, 0));
     }
-
+    //getter function
     public Vector2 GetGunAmmo()
     {
         Vector2 ammo = new Vector2(gun.StartingAmmo, gun.AmmoCapacity);
@@ -185,12 +193,15 @@ public class GunController : NetworkBehaviour
         public Vector3 InitialVelocity { get; set; }
         public TrailRenderer tracer { get; set; }
     }
+    //list of active bullets to deactivate
+    //TODO Object Pooling
     private List<Bullet> bullets = new List<Bullet>();
     private float maxLifeBullet = 1f;
     public Vector3 rayCastDestination { get; set; }
     #region SyncVars
     [SyncVar]
     public float timeSinceLastShot;
+    //ShootingHeld is used since the new input system has no functionality for holding key down
     [SyncVar]
     public bool ShootingHeld = false;
     #endregion
@@ -204,8 +215,9 @@ public class GunController : NetworkBehaviour
         
     }
     
+    //timerfor fire rate
     private bool CanShoot() => !gun.reload && timeSinceLastShot > 1f / (gun.FireRate / 60f);
-
+    //input system functions
     private void OnFire(InputValue value)
     {
         
@@ -229,9 +241,10 @@ public class GunController : NetworkBehaviour
   
     private void OnReload()
     {
+        //calls all copiesof user to reload, if not copies wont be able to fire
         CmdUpdateReload();
     }
-   
+   //shoot command wrapped in RPC to sync on all clients, not entirly sure if this is good practice, its my understanding of networking
    [ClientRpc]
     private void RpcShoot()
     {
@@ -267,7 +280,7 @@ public class GunController : NetworkBehaviour
     {
         bullets.RemoveAll(bullet => bullet.time >= maxLifeBullet);
     }
-
+    //bullet function for bullet drop and position in space
     Vector3 GetBuLletPos(Bullet bullet)
     {
         Vector3 gravity = Vector3.down * gun.bulletDrop;
@@ -275,6 +288,7 @@ public class GunController : NetworkBehaviour
         return (bullet.InitialPosition + (bullet.InitialVelocity * bullet.time) + (0.5f * gravity * bullet.time * bullet.time));
 
     }
+    //runs in constantly in the player movmeent
    void BulletSimulation(float deltatime)
     {
        
@@ -286,7 +300,8 @@ public class GunController : NetworkBehaviour
            RaycastSegmented(pos0, posEnd, bullet);
        });
     }
-
+    //creating physicall bullets in segments, this can be used to change the material of the bullet to anything
+    //and create impact per bullet and not just a ray with visuals
     private void RaycastSegmented(Vector3 pos0, Vector3 posEnd, Bullet bullet)
     {
         Vector3 direction = posEnd - pos0;
@@ -297,6 +312,7 @@ public class GunController : NetworkBehaviour
         if(Physics.Raycast(ray, out RaycastHit hit, distance))
         {            
             string surface = hit.transform.tag;
+            //hit mark effect based on surface type
             HitEffect(surface, hit);
             bullet.tracer.transform.position = hit.point;
             bullet.time = maxLifeBullet;
@@ -307,14 +323,22 @@ public class GunController : NetworkBehaviour
             bullet.tracer.transform.position = posEnd;
         }
     }
-
+    //creation of physicall bullets from the class and gun data
     Bullet CreateBullet(Vector3 initialPos, Vector3 initialVelocity)
     {
         Bullet bullet = new Bullet();
         bullet.InitialPosition = initialPos;
         bullet.InitialVelocity = initialVelocity;
         bullet.time = 0.0f;
-        bullet.tracer = Instantiate(bullerTracer, initialPos, Quaternion.identity);
+        if(gun.BulletTracer != null)
+        {
+            bullet.tracer = Instantiate(gun.BulletTracer, initialPos, Quaternion.identity);
+        }
+        else
+        {
+            bullet.tracer = Instantiate(bullerTracer, initialPos, Quaternion.identity);
+        }
+       
         bullet.tracer.AddPosition(initialPos);
         return bullet;
     }
@@ -334,6 +358,7 @@ public class GunController : NetworkBehaviour
         bullets.Add(bullet);
         RecoilFire();
     }
+    //hit effect is a decal from unity, can be changed to anything inside the player prefab under gun, a list of them cna be added and used based on surface type
     private void HitEffect(string surface, RaycastHit hit)
     {       
         rayCastDestination = hit.point;
@@ -356,7 +381,7 @@ public class GunController : NetworkBehaviour
         gun.reload = false;
         CmdWeaponSwitchSync();
     }
-
+    //the routine that runsfor simulating a held down button
     private IEnumerator Shooting()
     {
         while (ShootingHeld)
@@ -366,7 +391,7 @@ public class GunController : NetworkBehaviour
             yield return null;
         }
     }
-
+    //reload slowly based on the gun stats reload time
     private IEnumerator Reload()
     {       
         gun.reload = true;
@@ -381,6 +406,8 @@ public class GunController : NetworkBehaviour
         while (gun.StartingAmmo < gun.AmmoCapacity);
         gun.reload = false;
     }
+    //hit marker like any fps of whereyou hit
+    //TODO adjust colors and marker as it is hard to see
     private IEnumerator HitMarkerOn(RaycastHit hit)
     {
         //hit marker animation

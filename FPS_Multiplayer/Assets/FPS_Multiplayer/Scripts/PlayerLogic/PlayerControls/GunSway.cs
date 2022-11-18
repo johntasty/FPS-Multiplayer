@@ -16,8 +16,10 @@ public class GunSway : NetworkBehaviour
     {
         aimControll = value.Get<Vector2>();
     }
+    //adds some movement tothe gun when moved
     public void AimGun()
     {
+        //runs contantly on the player, take the mouseposition at a point and rotates left and right
         float mouseX = aimControll.x * sensitivityMu;
         float mouseY = aimControll.y * sensitivityMu;
         mouseY = Mathf.Clamp(mouseY, -10, 10);

@@ -15,12 +15,12 @@ MonoBehaviour:
   GunName: Sniper Rifle
   GunPrefab: {fileID: 305495858846055067, guid: f77195a4401d7214491f2edd06285959,
     type: 3}
-  Damage: 4
+  Damage: 10
   MaxRange: 200
-  StartingAmmo: 29
-  AmmoCapacity: 30
-  FireRate: 1200
-  ReloadTime: 2
+  StartingAmmo: 15
+  AmmoCapacity: 15
+  FireRate: 300
+  ReloadTime: 3
   muzzleFlash: {fileID: 4361613046433130778, guid: eeaff2ca249ed184e88a2281babb9733,
     type: 3}
   BulletTracer: {fileID: 0}

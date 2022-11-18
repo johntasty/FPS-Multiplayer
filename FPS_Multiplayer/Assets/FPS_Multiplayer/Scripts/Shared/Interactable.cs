@@ -16,18 +16,19 @@ public class Interactable : NetworkBehaviour, Damageable
     */
     public Transform TurretPivot;
     public Transform TurretAimPoint;
-
+    //attack patterns enemy TODO
     public float AimRotationSharpness = 5f;
     public float LookAtRotationSharpness = 2.5f;
     public float DetectionFireDelay = 1f;
     public float AimingTransitionBlendTime = 1f;
     
     const string k_AnimOnDamagedParameter = "OnDamaged";
-
+    //Todo bullet firing enemy
     //[SerializeField ] GameObject bulletPrefab;
     [SerializeField ] Animator animationController;
     //public AIState AiState { get; private set; }
 
+    //features to be implemented AI 
     Quaternion m_RotationWeaponForwardToPivot;
     float m_TimeStartedDetection;
     float m_TimeLostDetection;
@@ -40,7 +41,7 @@ public class Interactable : NetworkBehaviour, Damageable
 
     bool didFire = false;
     public bool rotating = false;
-
+    //synce hp over network
     [SyncVar]
     public float Health;
 
@@ -102,6 +103,7 @@ public class Interactable : NetworkBehaviour, Damageable
         StartCoroutine(RotateTurret());
        
     }
+    //tracks target player 
     private IEnumerator RotateTurret()
     {
         rotating = true;
@@ -132,6 +134,7 @@ public class Interactable : NetworkBehaviour, Damageable
     {
         _Target = null;
     }
+    //Todo attack patterns to AI
     private void TryAttack(Vector3 attackDirection)
     {
         Vector3 weaponForward = (attackDirection - TurretAimPoint.position).normalized;
@@ -139,11 +142,14 @@ public class Interactable : NetworkBehaviour, Damageable
         if (didFire) { return; }
         
     }
+    /// <summary>
+    /// TODO animations on dmg
+    /// </summary>
     void OnDamaged()
     {
         animationController.SetTrigger(k_AnimOnDamagedParameter);
     }
-
+    //broadcast hit toall clients
     [Command(requiresAuthority = false)]
     public void CmdDamage(float damgeValue)
     {
@@ -157,6 +163,7 @@ public class Interactable : NetworkBehaviour, Damageable
             DestoryNpc();
         }
     }
+    //display bar on top of AI
     void SetHpBar()
     {
         // update health bar value
