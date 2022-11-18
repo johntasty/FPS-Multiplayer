@@ -9,8 +9,8 @@ EditorBuildSettings:
     path: Assets/FPS_Multiplayer/Scenes/MainMenu.unity
     guid: 60e5a584e23205b49b40ca89645e751f
   - enabled: 1
-    path: Assets/FPS_Multiplayer/Scenes/Level_One.unity
-    guid: b93699bb573255c44bb851a0610ca55c
+    path: Assets/FPS_Multiplayer/Scenes/SecondaryScene.unity
+    guid: 0aaf251bdf668e84b8980589b8db56a0
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 7e0f1ef10d05df141b3cc48bd1eb37af,
       type: 2}

@@ -17,7 +17,7 @@ MonoBehaviour:
     type: 3}
   Damage: 4
   MaxRange: 200
-  StartingAmmo: 17
+  StartingAmmo: 30
   AmmoCapacity: 30
   FireRate: 1200
   ReloadTime: 2

@@ -13,8 +13,13 @@ public class GunController : NetworkBehaviour
     [SerializeField] public readonly SyncList<uint> gunPrefabServer = new SyncList<uint>();
     [SerializeField] List <GameObject> gunPrefabClient = new List<GameObject>();
     [SerializeField] Transform muzzle;
+    [SerializeField] public Transform CameraFocusing;
     [SerializeField] Transform gunsParent;
     [SerializeField] List<GameObject> muzzleFlash = new List<GameObject>();
+
+    //gun swapping index
+    [SyncVar]
+    private int WeaponIndex = 0;
 
     [Header("Impact effects, Set by name")]
     [SerializeField] List<ParticleSystem> hitEffects = new List<ParticleSystem>();
@@ -28,11 +33,12 @@ public class GunController : NetworkBehaviour
     private RecoilSet recoilStat;
     [SerializeField] Transform recoilTransform;
 
+    #region Client Callbacks
     public override void OnStartClient()
     {
         gunPrefabServer.Callback += OnWeaponAdded;
 
-        // Process initial SyncList payload
+        // Process Synclist on Spawn
         
         for (int index = 0; index < gunPrefabServer.Count; index++)
         {           
@@ -43,6 +49,10 @@ public class GunController : NetworkBehaviour
     {
         gunPrefabServer.Callback -= OnWeaponAdded;
     }
+    #endregion
+
+    #region Weapon Inventory
+    // sync list example from mirror
     private void OnWeaponAdded(SyncList<uint>.Operation op, int itemIndex, uint oldItem, uint newItem)
     {
         switch (op)
@@ -71,21 +81,29 @@ public class GunController : NetworkBehaviour
         }
     }
     private void SetUpClientGuns(uint ItemNew)
-    {
-        Debug.Log("Check run");
+    {       
+        //the check for client is done due to the host checking the list when its noit needed        
         if (!isClientOnly) { return; }
+        //get the game object based on network id to avoid any null 
+        //game objects and desyncs
         GameObject serverGun = NetworkClient.spawned[ItemNew].gameObject;
         serverGun.transform.SetParent(gunsParent);
         serverGun.transform.localPosition = Vector3.zero;
-        //GameObject gunToAdd = Instantiate(serverGun, gunsParent);
+        //set the muzzle particle spawn to the correct space using the mesh bounds
+        // saves time in not having to add a specific point in each prefab for a muzzle
         Vector3 muzzlePos = serverGun.GetComponent<MeshFilter>().mesh.bounds.size;
         muzzle.localPosition = new Vector3(0f, muzzlePos.x, muzzlePos.y);
-        serverGun.transform.localPosition = Vector3.zero;        
+        CameraFocusing.localPosition = muzzle.localPosition;
+        serverGun.transform.localPosition = Vector3.zero;  
+        //list of all availabe guns to the player, to be used as inventory for the switching
         gunPrefabClient.Add(serverGun);
 
     }
+    #endregion
     public void SetInitialData()
     {
+        gun = guns[WeaponIndex];
+        gun.reload = false;
         WeaponSet(gun);
         //weapon spawning should be done locally, the clients will go through a list and spawn their weapons
               
@@ -94,11 +112,14 @@ public class GunController : NetworkBehaviour
             GameObject gunToAdd = Instantiate(gunPrefabs.GunPrefab, gunsParent);
             Vector3 muzzlePos = gunToAdd.GetComponent<MeshFilter>().mesh.bounds.size;       
             muzzle.localPosition = new Vector3(0f, muzzlePos.x, muzzlePos.y);
+            CameraFocusing.localPosition = muzzle.localPosition;
             gunToAdd.transform.localPosition = Vector3.zero;
             gunToAdd.name = gunPrefabs.GunName;
             gunPrefabClient.Add(gunToAdd);
-                      
+            gunToAdd.SetActive(false);
+            
         }
+        gunPrefabClient[0].SetActive(true);
         if (!isOwned) { return; }
         CmdSpawnWeapon();
     }
@@ -135,6 +156,12 @@ public class GunController : NetworkBehaviour
         recoilStat.targetKickBack += new Vector3(0f, 0f, UnityEngine.Random.Range(-1, 0));
     }
 
+    public Vector2 GetGunAmmo()
+    {
+        Vector2 ammo = new Vector2(gun.StartingAmmo, gun.AmmoCapacity);
+        return ammo;
+
+    }
     //Recoil Settings
     class RecoilSet
     {
@@ -160,7 +187,7 @@ public class GunController : NetworkBehaviour
     }
     private List<Bullet> bullets = new List<Bullet>();
     private float maxLifeBullet = 1f;
-    Vector3 rayCastDestination;
+    public Vector3 rayCastDestination { get; set; }
     #region SyncVars
     [SyncVar]
     public float timeSinceLastShot;
@@ -326,7 +353,8 @@ public class GunController : NetworkBehaviour
     }
     private void OnWeaponSwitch()
     {
-
+        gun.reload = false;
+        CmdWeaponSwitchSync();
     }
 
     private IEnumerator Shooting()
@@ -391,6 +419,21 @@ public class GunController : NetworkBehaviour
             gunPrefabServer.Add(gunServer.GetComponent<NetworkIdentity>().netId);
         }
         
+    }
+    [Command]
+    private void CmdWeaponSwitchSync()
+    {
+        RpcWeaponSwitchAll();
+    }
+
+    [ClientRpc(includeOwner = true)]
+    private void RpcWeaponSwitchAll()
+    {
+        WeaponSet(guns[WeaponIndex]);
+        gun = guns[WeaponIndex];
+        gunPrefabClient[WeaponIndex].SetActive(false);
+        WeaponIndex = (WeaponIndex + 1) % guns.Count;
+        gunPrefabClient[WeaponIndex].SetActive(true);
     }
     #endregion
 }

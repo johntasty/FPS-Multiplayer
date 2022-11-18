@@ -466,12 +466,12 @@ MonoBehaviour:
   autoConnectClientBuild: 0
   sendRate: 30
   offlineScene: Assets/FPS_Multiplayer/Scenes/MainMenu.unity
-  onlineScene: Assets/FPS_Multiplayer/Scenes/Level_One.unity
+  onlineScene: Assets/FPS_Multiplayer/Scenes/SecondaryScene.unity
   transport: {fileID: 124372634}
   networkAddress: localhost
   maxConnections: 100
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 7158156486477595372, guid: ff6dd88ff46de9246a55f19b43d63fe2,
+  playerPrefab: {fileID: 8946759583972804881, guid: 2e313218b0a726845be437f4f6618779,
     type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 1
